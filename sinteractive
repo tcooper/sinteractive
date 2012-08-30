@@ -15,7 +15,7 @@
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # or
-# MYDIR=/usr/local/bin
+#MYDIR=/usr/local/bin
 
 # Batch Script that starts SCREEN
 BS=$MYDIR/_interactive
@@ -27,7 +27,8 @@ JOB=`sbatch --output=/dev/null --error=/dev/null $@ $BS 2>&1 \
     | egrep -o -e "\b[0-9]+$"`
 
 # Make sure the job is always canceled
-trap "{ /usr/bin/scancel -q $JOB; exit; }" SIGINT SIGTERM EXIT
+# Relying on $PATH for scancel
+trap "{ scancel -q $JOB; exit; }" SIGINT SIGTERM EXIT
 
 echo "Waiting for JOBID $JOB to start"
 while true;do

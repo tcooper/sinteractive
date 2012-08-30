@@ -13,4 +13,5 @@ proper X11 forwarding enabled.
 Scripts were written by  Pär Andersson (National Supercomputer Centre, Sweden)
 and published in the SLURM FAQ.
 
+Small changes made by Paul Mezzanini - 2012
 ==
