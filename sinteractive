@@ -11,8 +11,7 @@
 # The result is very similar to an interactive shell in PBS
 # (qsub -I)
 
-# Find our own path (linux specific)
-MYDIR="$( cd "$( dirname "$0" )" && pwd )"
+MYDIR="$(dirname "$(readlink -f ${BASH_SOURCE[0]})")"
 
 # or
 #MYDIR=/usr/local/bin
@@ -22,9 +21,29 @@ BS=$MYDIR/_interactive
 # Interactive screen script
 IS=$MYDIR/_interactive_screen
 
+#Lets set some defaults with the next verison of this script offering ways to change
+REQCPU="2"
+REQMEM="8192"
+REQTIME="24:00:00"
+
+#Prompts to change will go here  (aka TODO)
+echo " "
+echo "### If the job fails to start, make sure you have a --qos= option defined###"
+echo " "
+echo " "
+echo "Spawning job with the following resources:"
+echo "     Processors: ${REQCPU}"
+echo "         Memory: ${REQMEM}"
+echo "  Runtime limit: ${REQTIME}"
+echo " "
+
 # Submit the job and get the job id
-JOB=`sbatch --output=/dev/null --error=/dev/null $@ $BS 2>&1 \
+JOB=`sbatch --cpus-per-task=${REQCPU} --mem=${REQMEM} --time=${REQTIME} --output=/dev/null --error=/dev/null $@ $BS 2>&1 \
     | egrep -o -e "\b[0-9]+$"`
+
+#ORIGNAL THAT WORKS
+#JOB=`sbatch --output=/dev/null --error=/dev/null $@ $BS 2>&1 \
+#    | egrep -o -e "\b[0-9]+$"`
 
 # Make sure the job is always canceled
 # Relying on $PATH for scancel
@@ -55,6 +74,6 @@ NODE=`srun --jobid=$JOB -N1 hostname`
 
 # SSH to the node and attach the screen
 sleep 1s
-ssh -X -t $NODE $IS slurm$JOB
+ssh -X -c arcfour -C -t $NODE $IS slurm$JOB
 # The trap will now cancel the job before exiting.
 
