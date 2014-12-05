@@ -22,10 +22,10 @@ BS="$MYDIR/_interactive"
 IS="$MYDIR/_interactive_screen"
 
 #Lets set some defaults with the next verison of this script offering ways to change
-REQCPU="2"
-REQMEM="8192"
-REQTIME="24:00:00"
-QOS="free"
+REQCPU="$( read -e -p "How many CPU cores? :: " -i "2" )"
+REQMEM="$( read -e -p "How much memory (in MB)? :: " -i "8192" )"
+REQTIME="$( read -e -p "How many hours do you need? :: " -i "24" )"
+QOS="$( read -e -p "What QOS? :: " -i "free" )"
 
 #Prompts to change will go here  (aka TODO)
 echo " "
