@@ -24,10 +24,12 @@ BS="$MYDIR/_interactive"
 IS="$MYDIR/_interactive_screen"
 
 echo "=*~-  Please enter your resource requirements.  -~*="
-REQCPU="$( read -e -p "How many CPU cores? :: " -i "2" )"
-REQMEM="$( read -e -p "How much memory (in MB)? :: " -i "8192" )"
-REQTIME="$( read -e -p "How many hours do you need? :: " -i "24" )"
-QOS="$( read -e -p "What QOS? :: " -i "free" )"
+echo " "
+read -e -p "How many CPU cores? :: " -i "2" REQCPU
+read -e -p "How much memory (in MB)? :: " -i "8192" REQMEM
+read -e -p "How many hours do you need? :: " -i "24" REQTIME
+read -e -p "What QOS? :: " -i "free" QOS
+read -e -p "What partition? :: " -i "work" PARTITION
 
 echo " "
 echo "Spawning job with the following resources:"
@@ -39,8 +41,9 @@ echo " "
 
 # Submit the job and get the job id
 JOB="$( sbatch --cpus-per-task="${REQCPU}" --mem="${REQMEM}" \
-    --time="${REQTIME}" --output=/dev/null \
-    --error=/dev/null "$@" "$BS" |& egrep -o -e "\b[0-9]+$" )"
+    --time="${REQTIME}" --qos="${QOS}" --partition="${PARTITION}"\
+    --output=/dev/null --error=/dev/null "$@" "$BS" \
+    |& egrep -o -e "\b[0-9]+$" )"
 
 # Make sure the job is always canceled
 # Relying on $PATH for scancel
