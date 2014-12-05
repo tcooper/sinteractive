@@ -11,6 +11,8 @@
 # The result is very similar to an interactive shell in PBS
 # (qsub -I)
 
+set -e
+
 MYDIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
 
 # or
@@ -21,16 +23,12 @@ BS="$MYDIR/_interactive"
 # Interactive screen script
 IS="$MYDIR/_interactive_screen"
 
-#Lets set some defaults with the next verison of this script offering ways to change
+echo "=*~-  Please enter your resource requirements.  -~*="
 REQCPU="$( read -e -p "How many CPU cores? :: " -i "2" )"
 REQMEM="$( read -e -p "How much memory (in MB)? :: " -i "8192" )"
 REQTIME="$( read -e -p "How many hours do you need? :: " -i "24" )"
 QOS="$( read -e -p "What QOS? :: " -i "free" )"
 
-#Prompts to change will go here  (aka TODO)
-echo " "
-echo "### If the job fails to start, ensure you have a --qos= option defined ###"
-echo " "
 echo " "
 echo "Spawning job with the following resources:"
 echo "     Processors: ${REQCPU}"
