@@ -45,7 +45,8 @@ JOB="$( sbatch --cpus-per-task="${REQCPU}" --mem="${REQMEM}" \
 
 # Make sure the job is always canceled
 # Relying on $PATH for scancel
-trap "{ scancel -q "${JOB}"; exit; }" SIGINT SIGTERM EXIT
+trap "{ echo 'Exit triggered. Cancelling job.'; \
+    scancel -q "${JOB}"; exit; }" SIGINT SIGTERM EXIT
 
 echo "Waiting for JOBID ${JOB} to start"
 while : ; do
