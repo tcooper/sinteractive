@@ -13,15 +13,12 @@
 
 set -e
 
-MYDIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}" )" )"
-
-# or
-#MYDIR=/usr/local/bin
+MYDIR="$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
 
 # Batch Script that starts SCREEN
-BS="$MYDIR/_interactive"
+BS="${MYDIR}/_interactive"
 # Interactive screen script
-IS="$MYDIR/_interactive_screen"
+IS="${MYDIR}/_interactive_screen"
 
 echo "=*~-  Please enter your resource requirements.  -~*="
 echo " "
@@ -37,42 +34,46 @@ echo "     Processors: ${REQCPU}"
 echo "         Memory: ${REQMEM}"
 echo "  Runtime limit: ${REQTIME}"
 echo "            QOS: ${QOS}"
+echo "      Partition: ${PARTITION}"
 echo " "
 
 # Submit the job and get the job id
 JOB="$( sbatch --cpus-per-task="${REQCPU}" --mem="${REQMEM}" \
     --time="${REQTIME}" --qos="${QOS}" --partition="${PARTITION}"\
-    --output=/dev/null --error=/dev/null "$@" "$BS" \
+    --output=/dev/null --error=/dev/null "$@" "${BS}" \
     |& egrep -o -e "\b[0-9]+$" )"
 
 # Make sure the job is always canceled
 # Relying on $PATH for scancel
-trap "{ scancel -q "$JOB"; exit; }" SIGINT SIGTERM EXIT
+trap "{ scancel -q "${JOB}"; exit; }" SIGINT SIGTERM EXIT
 
-echo "Waiting for JOBID $JOB to start"
+echo "Waiting for JOBID ${JOB} to start"
 while : ; do
     sleep 1s
 
     # Check job status
-    STATUS="$( squeue -j "$JOB" -t PD,R -h -o %t )"
+    STATUS="$( squeue -j "${JOB}" -t PD,R -h -o %t )"
 
-    if [[ "$STATUS" = "R" ]];then
+    if [[ "${STATUS}" = "R" ]]; then
         # Job is running, break the while loop
         break
-    elif [[ "$STATUS" != "PD" ]];then
+    elif [[ "${STATUS}" != "PD" ]]; then
         echo "Job is not Running or Pending. Aborting"
-        scancel "$JOB"
+        scancel "${JOB}"
         exit 1
     fi
 
     echo -n "."
-
 done
 
 # Determine the first node in the job:
-NODE="$( srun --jobid="$JOB" -N1 hostname )"
+NODE="$( srun --jobid="${JOB}" -N1 hostname )"
 
 # SSH to the node and attach the screen
+
 sleep 1s
-ssh -X -c arcfour -C -t "$NODE" "$IS" "slurm$JOB"
+
+ssh -X -o StrictHostKeyChecking=no -c arcfour -C \
+    -t "${NODE}" "${IS}" "slurm${JOB}"
+
 # The trap will now cancel the job before exiting.
