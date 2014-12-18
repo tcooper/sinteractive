@@ -65,7 +65,7 @@ INFO "=*~-  Please enter your resource requirements.  -~*="
 echo " "
 read -e -p "How many CPU cores? :: " -i "2" REQCPU
 read -e -p "How much memory (in MB)? :: " -i "8192" REQMEM
-read -e -p "How many hours do you need? :: " -i "24" REQTIME
+read -e -p "How many minutes do you need? :: " -i "1440" REQTIME
 read -e -p "What QOS? :: " -i "free" QOS
 read -e -p "What partition? :: " -i "work" PARTITION
 
@@ -73,8 +73,8 @@ echo " "
 
 INFO "Spawning job with the following resources:"
 INFO "     Processors: ${REQCPU}"
-INFO "         Memory: ${REQMEM}"
-INFO "  Runtime limit: ${REQTIME}"
+INFO "         Memory: ${REQMEM} MB"
+INFO "  Runtime limit: ${REQTIME} minutes"
 INFO "            QOS: ${QOS}"
 INFO "      Partition: ${PARTITION}"
 
