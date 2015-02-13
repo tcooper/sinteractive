@@ -71,6 +71,11 @@ read -e -p "What partition? :: " -i "work" PARTITION
 
 echo " "
 
+WARN "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+WARN "!! If you detach from the sinteractive  !!"
+WARN "!! screen session, it _WILL_ be killed. !!"
+WARN "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo " "
 INFO "Spawning job with the following resources:"
 INFO "     Processors: ${REQCPU}"
 INFO "         Memory: ${REQMEM} MB"
