@@ -1,0 +1,46 @@
+#!/bin/bash
+
+tput setaf 2
+echo "Welcome to sinteractive!"
+tput sgr0
+
+cat <<"EOF"
+
+This is really just a fancy-dancy screen session.
+
+You'll find at the bottom of your terminal that there are multiple "tabs" open.
+These tabs, or regions, all exist within a single encompassing screen "session."
+One of these tabs is a BASH prompt and another is HTOP, so you can monitor the
+utilization of the system to which you were scheduled. A lot of users find this
+to be very handy when trying to optimize their jobs.
+
+Please be sure to close out of sinteractive when you're done.
+
+Here are some useful screen commands.
+
+Key sequence    Result
+-------------------------------------------------------------------------------
+ctrl+a ?        Displays commands and its defaults (VERY important)
+ctrl+a :        Enter to the command prompt of screen
+ctrl+a "        Window list
+ctrl+a <num>    Opens window <num>
+ctrl+a A        Rename the current window
+ctrl+a a        Sends ctrl+a to the current window
+ctrl+a c        Create a new window (with shell)
+ctrl+a S        Split current region into two regions
+ctrl+a tab      Switch the input focus to the next region
+ctrl+a ctrl+a   Toggle between current and previous region
+ctrl+a Esc      Enter Copy Mode (use enter to select a range of text)
+                --> This is also super useful for scrolling through output
+ctrl+a ]        Paste text
+ctrl+a Q        Close all regions but the current one
+ctrl+a X        Close the current region
+                                                [Stolen from the Arch wiki]
+
+EOF
+tput setaf 1
+echo "WARNING: if you detach from this screen session, your job will be killed."
+tput sgr0
+echo "To continue, close this region"
+trap '{ :; }' INT
+while : ; do dd &>/dev/null ; done
