@@ -100,6 +100,15 @@ fi
 trap "{ echo 'Exit triggered. Cancelling job.' >&2 ; \
     scancel --quiet "${JOB}"; exit ; }" EXIT
 
+sleep 1
+
+# See if everything exploded immediately
+if scontrol show job "$JOB" 2>/dev/null | grep -q "JobState=FAILED"; then
+    ERROR "Looks like sinteractive is broken. Contact an administrator."
+    exit 1
+fi
+
+TIMEOUT="60"
 INFO "Waiting for JOBID ${JOB} to start"
 while : ; do
     sleep 1s
@@ -110,10 +119,18 @@ while : ; do
     if [[ "${STATUS}" = "R" ]]; then
         # Job is running, break the while loop
         break
-    elif [[ "${STATUS}" != "PD" ]]; then
-        # we can just let the trap cancel our job for us
+    fi
+
+    if [[ "$TIMEOUT" -le 0 ]]; then
+        # Let the trap sort 'em out
+        echo
+        INFO "Waiting for job start timed out."
+        INFO "This is probably just a sign the cluster is real busy."
+        INFO "Please try again later."
         exit 1
     fi
+
+    ((TIMEOUT--))
 
     echo -n "."
 done
