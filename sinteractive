@@ -54,7 +54,7 @@ function INFO()
     TPUT sgr0
 }
 
-MYDIR="$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
+export MYDIR="$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
 
 # Batch Script that starts SCREEN
 BS="${MYDIR}/_interactive"
@@ -85,10 +85,11 @@ INFO "      Partition: ${PARTITION}"
 
 echo " "
 
+INFO "Submitting job..."
 # Submit the job and get the job id
 if ! JOB="$( sbatch --cpus-per-task="${REQCPU}" --mem="${REQMEM}" \
     --time="${REQTIME}" --qos="${QOS}" --partition="${PARTITION}"\
-    --output=/dev/null --error=/dev/null "$@" "${BS}" \
+    --output=/dev/null --error=/dev/null --export MYDIR "$@" "${BS}" \
     |& egrep -o -e "\b[0-9]+$" )"; then
 
     ERROR "Failed to create job. Please double-check all settings are valid."
