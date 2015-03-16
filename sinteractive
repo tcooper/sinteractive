@@ -57,6 +57,7 @@ function INFO()
 function READ_CONFIG()
 {
     [[ -r "$MYDIR"/sinteractive.conf ]] && . "$MYDIR"/sinteractive.conf
+    [[ -r ~/.sinteractive.conf ]] && . ~/.sinteractive.conf
     DEFCPU="${DEFCPU:=2}"
     DEFMEM="${DEFMEM:=4096}"
     DEFTIME="${DEFTIME:=120}"
