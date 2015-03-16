@@ -54,20 +54,39 @@ function INFO()
     TPUT sgr0
 }
 
+function READ_CONFIG()
+{
+    [[ -r "$MYDIR"/sinteractive.conf ]] && . "$MYDIR"/sinteractive.conf
+    DEFCPU="${DEFCPU:=2}"
+    DEFMEM="${DEFMEM:=4096}"
+    DEFTIME="${DEFTIME:=120}"
+    USE_QOS="${USE_QOS:=no}"
+    if [[ "$USE_QOS" = "yes" ]]; then
+        DEFQOS="${DEFQOS:=free}"
+    fi
+    DEFPART="${DEFPART:=work}"
+    TIMEOUT="${TIMEOUT:=60}"
+}
+
 export MYDIR="$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
 
 # Batch Script that starts SCREEN
 BS="${MYDIR}/_interactive"
 # Interactive screen script
 IS="${MYDIR}/_interactive_screen"
+READ_CONFIG
 
 INFO ">Please enter your resource requirements.<"
 echo " "
-read -e -p "How many CPU cores? :: " -i "2" REQCPU
-read -e -p "How much memory (in MB)? :: " -i "4096" REQMEM
-read -e -p "How many minutes do you need? :: " -i "120" REQTIME
-read -e -p "What QOS? :: " -i "free" QOS
-read -e -p "What partition? :: " -i "work" PARTITION
+read -e -p "How many CPU cores? :: " -i "$DEFCPU" REQCPU
+read -e -p "How much memory (in MB)? :: " -i "$DEFMEM" REQMEM
+read -e -p "How many minutes do you need? :: " -i "$DEFTIME" REQTIME
+
+if [[ $USE_QOS = "yes" ]]; then
+    read -e -p "What QOS? :: " -i "$DEFQOS" QOS
+fi
+
+read -e -p "What partition? :: " -i "$DEFPART" PARTITION
 
 echo " "
 
@@ -80,16 +99,28 @@ INFO "Spawning job with the following resources:"
 INFO "     Processors: ${REQCPU}"
 INFO "         Memory: ${REQMEM} MB"
 INFO "  Runtime limit: ${REQTIME} minutes"
-INFO "            QOS: ${QOS}"
+
+if [[ $USE_QOS = "yes" ]]; then
+    INFO "            QOS: ${QOS}"
+fi
+
 INFO "      Partition: ${PARTITION}"
+
+#declare SBATCH_ARGS as an array
+declare -a SBATCH_ARGS
+
+SBATCH_ARGS=( --cpus-per-task="${REQCPU}" --mem="${REQMEM}" \
+    --time="${REQTIME}" --partition="${PARTITION}"\
+    --output=/dev/null --error=/dev/null --export MYDIR )
+
+if [[ $USE_QOS = "yes" ]]; then
+    SBATCH_ARGS+=( --qos="${QOS}" )
+fi
 
 echo " "
 
 INFO "Submitting job..."
-# Submit the job and get the job id
-if ! JOB="$( sbatch --cpus-per-task="${REQCPU}" --mem="${REQMEM}" \
-    --time="${REQTIME}" --qos="${QOS}" --partition="${PARTITION}"\
-    --output=/dev/null --error=/dev/null --export MYDIR "$@" "${BS}" \
+if ! JOB="$( sbatch "${SBATCH_ARGS[@]}" "$@" "${BS}" \
     |& egrep -o -e "\b[0-9]+$" )"; then
 
     ERROR "Failed to create job. Please double-check all settings are valid."
@@ -109,7 +140,6 @@ if scontrol show job "$JOB" 2>/dev/null | grep -q "JobState=FAILED"; then
     exit 1
 fi
 
-TIMEOUT="60"
 INFO "Waiting for JOBID ${JOB} to start"
 while : ; do
     sleep 1s
