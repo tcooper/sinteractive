@@ -175,7 +175,7 @@ NODE="$( srun --jobid="${JOB}" -N1 hostname )"
 sleep 1s
 
 # sacrific security for user experience
-ssh -X -o StrictHostKeyChecking=no -c arcfour -C \
+ssh -Y -o StrictHostKeyChecking=yes -c arcfour -C \
     -t "${NODE}" "${IS}" "slurm${JOB}"
 
 INFO "Wrapping up..."
