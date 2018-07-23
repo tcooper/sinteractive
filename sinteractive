@@ -14,7 +14,8 @@ set -e
 function TPUT()
 {
     #check for TTY and tput and redefine our existence based upon the results
-    if [[ -t 1 && -t 2 ]] && command -v "tput" >& /dev/null ; then
+    if [[ -t 1 && -t 2 ]] && command -v "tput" >& /dev/null \
+               && tput setaf 1 >& /dev/null ; then
         function TPUT()
         {
             tput "$@"
